@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade, downgrade
 import config
@@ -16,6 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = '{driver}://{user}:{password}@{host}:{po
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+ma = Marshmallow(app)
 
 
 @app.cli.command("seed-db")
@@ -49,6 +51,18 @@ class User(db.Model):
     name = db.Column(db.String(128), nullable=False)
 
 
+class UserSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = User
+
+    id = ma.auto_field()
+    name = ma.auto_field()
+
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
+
+
 @app.route('/')
 def index():
-    return jsonify(User.query.all())
+    return users_schema.jsonify(User.query.all())
