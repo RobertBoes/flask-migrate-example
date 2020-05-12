@@ -1,7 +1,10 @@
+from random import randint
+
 from flask import Flask, jsonify
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade, downgrade
+
 import config
 
 app = Flask(__name__)
@@ -29,6 +32,11 @@ def seed():
 def seed_db():
     for number in range(1, 10):
         user = User(name='Test user {number}'.format(number=number))
+
+        for product_number in range(1, randint(2, 6)):
+            order = Order(quantity=1, item='Product #{product_number}'.format(product_number=product_number))
+            user.orders.append(order)
+
         db.session.add(user)
         db.session.flush()
     db.session.commit()
@@ -46,9 +54,26 @@ def reset_db():
     seed_db()
 
 
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    item = db.Column(db.String(128), nullable=False)
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128), nullable=False)
+    orders = db.relationship('Order', backref='user', lazy=True)
+
+
+class OrderSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Order
+
+    id = ma.auto_field()
+    quantity = ma.auto_field()
+    item = ma.auto_field()
 
 
 class UserSchema(ma.SQLAlchemySchema):
@@ -57,6 +82,7 @@ class UserSchema(ma.SQLAlchemySchema):
 
     id = ma.auto_field()
     name = ma.auto_field()
+    orders = ma.List(ma.Nested(OrderSchema))
 
 
 user_schema = UserSchema()
