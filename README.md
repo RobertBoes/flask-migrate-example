@@ -49,7 +49,7 @@ We can test this by adding a new model with a relation to that model in `app.py`
       id = db.Column(db.Integer, primary_key=True, autoincrement=True)
       name = db.Column(db.String(128), nullable=False)
       orders = db.relationship('Order', backref='user', lazy=True)
-+     billing_methods = db.relationshop('BillingMethod', backref='user', lazy=True)
++     billing_methods = db.relationship('BillingMethod', backref='user', lazy=True)
 ```
 
 After adding the code above you can generate a migration using `flask db migrate -m "Add billing method"`,
