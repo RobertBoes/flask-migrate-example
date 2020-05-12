@@ -34,7 +34,12 @@ def seed_db():
         user = User(name='Test user {number}'.format(number=number))
 
         for product_number in range(1, randint(2, 6)):
-            order = Order(quantity=1, item='Product #{product_number}'.format(product_number=product_number))
+            quantity = randint(1, 3)
+            order = Order(
+                quantity=quantity,
+                item='Product #{product_number}'.format(product_number=product_number),
+                price=quantity*5,
+            )
             user.orders.append(order)
 
         db.session.add(user)
@@ -59,6 +64,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     item = db.Column(db.String(128), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
 
 
 class User(db.Model):
@@ -74,6 +80,7 @@ class OrderSchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     quantity = ma.auto_field()
     item = ma.auto_field()
+    price = ma.auto_field()
 
 
 class UserSchema(ma.SQLAlchemySchema):
