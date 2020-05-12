@@ -1,0 +1,8 @@
+/venv/
+/.env
+/.flaskenv
+/.idea
+
+__pycache__/
+*.py[cod]
+*$py.class
